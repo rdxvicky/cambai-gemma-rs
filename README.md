@@ -25,8 +25,8 @@ A high-performance Rust application that combines OpenAI's Whisper for speech re
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/cambai-gemma-rs.git
-cd cambai-gemma-rs
+git clone https://github.com/rdxvicky/gemma-edge-translator.git
+cd gemma-edge-translator
 
 # Build with all features
 cargo build --release --features "ui,realtime"
@@ -36,20 +36,20 @@ cargo build --release --features "ui,realtime"
 
 ```bash
 # Translate a WAV file from Spanish to English
-./target/release/gemma-translator-rs \
+./target/release/gemma-edge-translator \
   --wav input.wav \
   --direction es-en \
   --gemma-model path/to/gemma-2b-it.gguf \
   --api-key your-openai-key
 
 # Real-time translation (5 seconds of recording)
-./target/release/gemma-translator-rs \
+./target/release/gemma-edge-translator \
   --realtime 5 \
   --direction en-es \
   --gemma-model path/to/gemma-2b-it.gguf
 
 # Launch web UI
-./target/release/gemma-translator-rs \
+./target/release/gemma-edge-translator \
   --ui \
   --port 8080 \
   --gemma-model path/to/gemma-2b-it.gguf
@@ -127,8 +127,8 @@ sudo apt install -y \
   git
 
 # Clone and build (expect 30-60 minutes)
-git clone https://github.com/your-username/cambai-gemma-rs.git
-cd cambai-gemma-rs
+git clone https://github.com/rdxvicky/gemma-edge-translator.git
+cd gemma-edge-translator
 
 # Build with optimizations for Pi
 RUSTFLAGS="-C target-cpu=native" \
@@ -171,7 +171,7 @@ export OPENAI_API_KEY="your-api-key-here"
 
 ```bash
 # Spanish audio to English text
-./gemma-translator-rs \
+./gemma-edge-translator \
   --wav spanish_audio.wav \
   --direction es-en \
   --gemma-model models/gemma-2-2b-it-Q4_K_M.gguf
@@ -181,7 +181,7 @@ export OPENAI_API_KEY="your-api-key-here"
 
 ```bash
 # Record 10 seconds and translate English to Spanish
-./gemma-translator-rs \
+./gemma-edge-translator \
   --realtime 10 \
   --direction en-es \
   --gemma-model models/gemma-2-2b-it-Q4_K_M.gguf \
@@ -192,7 +192,7 @@ export OPENAI_API_KEY="your-api-key-here"
 
 ```bash
 # Start web UI on port 3000
-./gemma-translator-rs \
+./gemma-edge-translator \
   --ui \
   --port 3000 \
   --gemma-model models/gemma-2-2b-it-Q4_K_M.gguf
@@ -307,8 +307,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ### Development Setup
 
 ```bash
-git clone https://github.com/your-username/cambai-gemma-rs.git
-cd cambai-gemma-rs
+git clone https://github.com/rdxvicky/gemma-edge-translator.git
+cd gemma-edge-translator
 
 # Install development dependencies
 cargo install cargo-watch

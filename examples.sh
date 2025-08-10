@@ -5,7 +5,7 @@
 
 set -e
 
-BINARY="./target/release/gemma-translator-rs"
+BINARY="./target/release/gemma-edge-translator"
 MODEL_PATH="models/gemma-2-2b-it-Q4_K_M.gguf"
 
 # Colors for output
