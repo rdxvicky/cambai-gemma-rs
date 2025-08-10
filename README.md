@@ -145,11 +145,7 @@ mkdir -p models
 cd models
 
 # Download Gemma-2B-IT GGUF (adjust URL as needed)
-wget https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf
-
-# Or use a smaller quantized version for Pi
-wget https://huggingface.co/bartowski/gemma-2-2b-it-GGUF/resolve/main/gemma-2-2b-it-Q4_K_M.gguf
-```
+wget https://huggingface.co/codegood/gemma-2b-it-Q4_K_M-GGUF?show_file_info=gemma-2b-it.Q4_K_M.gguf
 
 ### OpenAI API Setup
 
@@ -297,12 +293,11 @@ echo 'gpu_mem=128' | sudo tee -a /boot/config.txt
 # Use quantized models (Q4_K_M instead of F16)
 ```
 
-## 📊 Performance Benchmarks
+## 📊 Performance Benchmarks (Still Validating, placeholder numbers)
 
 | Platform | Model Size | Context | RAM Usage | Processing Time |
 |----------|------------|---------|-----------|----------------|
-| MacBook Pro M2 | 2B Q4_K_M | 2048 | ~3GB | ~2-3s |
-| Linux Desktop | 2B Q4_K_M | 2048 | ~2.5GB | ~3-4s |
+| MacBook Pro M1 | 2B Q4_K_M | 2048 | ~3GB | ~2-3s |
 | Raspberry Pi 4 8GB | 2B Q4_K_M | 1024 | ~2GB | ~8-12s |
 
 ## 🤝 Contributing
@@ -331,7 +326,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [OpenAI Whisper](https://github.com/openai/whisper) for speech recognition
 - [Google Gemma](https://ai.google.dev/gemma) for language modeling
 - [llama.cpp](https://github.com/ggerganov/llama.cpp) for efficient inference
-- [whisper.cpp](https://github.com/ggerganov/whisper.cpp) for Whisper implementation
 
 ---
 
