@@ -1,0 +1,46 @@
+# Rust build artifacts
+/target/
+Cargo.lock
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Model files (usually large)
+*.gguf
+*.bin
+*.safetensors
+*.pt
+*.pth
+models/
+
+# Audio test files
+*.wav
+*.mp3
+*.flac
+*.m4a
+audio-samples/
+test-audio/
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+
+# Documentation build
+docs/_build/
+site/

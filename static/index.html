@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gemma Translator</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <h1><i class="fas fa-language"></i> Gemma Translator</h1>
+        <p class="header-subtitle">Real-time speech translation powered by AI</p>
+      </div>
+      <div class="header-right">
+        <div class="tech-stack">
+          <div class="tech-item">
+            <i class="fas fa-microphone"></i>
+            <span>ASR: Whisper</span>
+          </div>
+          <div class="tech-item">
+            <i class="fas fa-brain"></i>
+            <span>AI: Gemma-2B-IT</span>
+          </div>
+          <div class="tech-item">
+            <i class="fas fa-code"></i>
+            <span>Built with Rust</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- System Status at Top -->
+    <section class="stats stats-top">
+      <div class="card-header">
+        <h2><i class="fas fa-chart-line"></i> System Status</h2>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-microchip"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">CPU Usage</span>
+            <span class="stat-value" id="cpu">--%</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-memory"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Memory</span>
+            <span class="stat-value" id="mem">-- / -- MB</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-microphone"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Audio Input</span>
+            <span class="stat-value" id="audio-status">Available</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <section class="controls">
+        <div class="card-header">
+          <h2><i class="fas fa-edit"></i> Input</h2>
+        </div>
+        <div class="form-group">
+          <label for="direction">
+            <i class="fas fa-exchange-alt"></i>
+            Translation Direction
+          </label>
+          <select id="direction">
+            <option value="es-en">🇪🇸 Spanish → 🇺🇸 English</option>
+            <option value="en-es">🇺🇸 English → 🇪🇸 Spanish</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="text">
+            <i class="fas fa-keyboard"></i>
+            Text to Translate
+          </label>
+          <div class="input-controls">
+            <textarea id="text" placeholder="Enter your text here or use voice input..."></textarea>
+            <div class="input-buttons">
+              <button id="asr-btn" class="asr-btn" title="Voice Input">
+                <i class="fas fa-microphone"></i>
+              </button>
+              <button id="clear-btn" class="clear-btn" title="Clear Text">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button id="go" class="translate-btn">
+            <i class="fas fa-paper-plane"></i>
+            Translate
+          </button>
+        </div>
+      </section>
+
+      <section class="output">
+        <div class="card-header">
+          <h2><i class="fas fa-file-text"></i> Translation Result</h2>
+          <div class="status-indicator" id="status">
+            <i class="fas fa-circle"></i>
+            <span>Ready</span>
+          </div>
+        </div>
+        <div class="output-content">
+          <pre id="out">No translation yet. Enter some text, use voice input, or click "Translate" to get started!</pre>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <small>Runs on Raspberry Pi 4/5 and Mac (Apple Silicon). Built with Rust.</small>
+  </footer>
+
+  <script>
+    function updateStatus(text, type = 'ready') {
+      const status = document.getElementById('status');
+      const icon = status.querySelector('i');
+      const span = status.querySelector('span');
+      
+      status.className = `status-indicator ${type}`;
+      span.textContent = text;
+      
+      switch(type) {
+        case 'processing':
+          icon.className = 'fas fa-spinner fa-spin';
+          break;
+        case 'success':
+          icon.className = 'fas fa-check-circle';
+          break;
+        case 'error':
+          icon.className = 'fas fa-exclamation-triangle';
+          break;
+        default:
+          icon.className = 'fas fa-circle';
+      }
+    }
+
+    async function refreshStats(){
+      try{
+        const r = await fetch('/stats');
+        const s = await r.json();
+        document.getElementById('cpu').textContent = s.cpu_usage.toFixed(1) + '%';
+        document.getElementById('mem').textContent = s.mem_used_mb + ' / ' + s.mem_total_mb + ' MB';
+      }catch(e){/* ignore */}
+    }
+    setInterval(refreshStats, 1500);
+    refreshStats();
+
+    document.getElementById('go').addEventListener('click', async () =>{
+      const direction = document.getElementById('direction').value;
+      const text = document.getElementById('text').value.trim();
+      
+      if (!text) {
+        updateStatus('Please enter some text to translate', 'error');
+        return;
+      }
+      
+      const button = document.getElementById('go');
+      const originalText = button.innerHTML;
+      
+      try {
+        // Update UI to show processing
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Translating...';
+        button.disabled = true;
+        updateStatus('Translating...', 'processing');
+        
+        const startTime = Date.now();
+        const r = await fetch('/translate', { 
+          method:'POST', 
+          headers:{'Content-Type':'application/json'}, 
+          body: JSON.stringify({direction, text})
+        });
+        
+        if (!r.ok) {
+          throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+        }
+        
+        const j = await r.json();
+        const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+        
+        // Display formatted result - clean translation only
+        const output = document.getElementById('out');
+        if (j.ok && j.translated) {
+          // Clean up the translation by removing model artifacts
+          let cleanTranslation = j.translated
+            .replace(/<start_of_turn>model\s*/g, '')
+            .replace(/\s*> EOF by user$/g, '')
+            .replace(/\n\s*\n/g, '\n')
+            .trim();
+          
+          output.innerHTML = `<div class="translation-result">
+            <div class="translated-text">
+              <p>${cleanTranslation}</p>
+            </div>
+            <div class="meta-info">
+              <small>Completed in ${duration}s</small>
+            </div>
+          </div>`;
+        } else {
+          output.textContent = JSON.stringify(j, null, 2);
+        }
+        
+        updateStatus(`Translated in ${duration}s`, 'success');
+      } catch (error) {
+        console.error('Translation error:', error);
+        document.getElementById('out').textContent = `Error: ${error.message}`;
+        updateStatus('Translation failed', 'error');
+      } finally {
+        // Reset button
+        button.innerHTML = originalText;
+        button.disabled = false;
+        
+        // Reset status after 3 seconds
+        setTimeout(() => updateStatus('Ready'), 3000);
+      }
+    });
+
+    // Speech Recognition Setup with Real-time Translation
+    let recognition = null;
+    let isRecording = false;
+    let silenceTimer = null;
+    let lastTranscript = '';
+    let isTranslating = false;
+    const SILENCE_THRESHOLD = 2500; // 2.5 seconds of silence before auto-translation
+
+    // Translation function for real-time use
+    async function translateText(text) {
+      if (isTranslating || !text.trim()) return;
+      
+      isTranslating = true;
+      updateStatus('Auto-translating...', 'processing');
+      
+      try {
+        const direction = document.getElementById('direction').value;
+        const startTime = Date.now();
+        
+        const r = await fetch('/translate', { 
+          method:'POST', 
+          headers:{'Content-Type':'application/json'}, 
+          body: JSON.stringify({direction, text})
+        });
+        
+        if (!r.ok) {
+          throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+        }
+        
+        const j = await r.json();
+        const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+        
+        // Display clean translation result
+        const output = document.getElementById('out');
+        if (j.ok && j.translated) {
+          let cleanTranslation = j.translated
+            .replace(/<start_of_turn>model\s*/g, '')
+            .replace(/\s*> EOF by user$/g, '')
+            .replace(/\n\s*\n/g, '\n')
+            .trim();
+          
+          output.innerHTML = `<div class="translation-result">
+            <div class="translated-text">
+              <p>${cleanTranslation}</p>
+            </div>
+            <div class="meta-info">
+              <small>Auto-translated in ${duration}s</small>
+            </div>
+          </div>`;
+        }
+        
+        updateStatus(`Translated in ${duration}s`, 'success');
+        setTimeout(() => {
+          if (isRecording) {
+            updateStatus('Listening...', 'processing');
+          } else {
+            updateStatus('Ready', 'ready');
+          }
+        }, 1500);
+        
+      } catch (error) {
+        console.error('Auto-translation error:', error);
+        updateStatus('Translation failed', 'error');
+      } finally {
+        isTranslating = false;
+      }
+    }
+
+    function setupSpeechRecognition() {
+      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+        
+        recognition.onstart = () => {
+          isRecording = true;
+          const asrBtn = document.getElementById('asr-btn');
+          asrBtn.classList.add('recording');
+          asrBtn.innerHTML = '<i class="fas fa-stop"></i>';
+          asrBtn.title = 'Stop Real-time Translation';
+          updateStatus('Listening for real-time translation...', 'processing');
+          document.getElementById('audio-status').textContent = 'Real-time Mode';
+        };
+        
+        recognition.onresult = (event) => {
+          let transcript = '';
+          let isFinal = false;
+          
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              isFinal = true;
+            }
+          }
+          
+          // Update textarea with current transcript
+          document.getElementById('text').value = transcript;
+          
+          // Clear existing silence timer
+          if (silenceTimer) {
+            clearTimeout(silenceTimer);
+          }
+          
+          // Only trigger translation for significant changes
+          if (transcript.trim() !== lastTranscript.trim() && transcript.trim().length > 3) {
+            // Set new silence timer for auto-translation
+            silenceTimer = setTimeout(() => {
+              if (transcript.trim() && transcript.trim() !== lastTranscript.trim()) {
+                lastTranscript = transcript.trim();
+                translateText(transcript);
+              }
+            }, SILENCE_THRESHOLD);
+          }
+          
+          // For final results, translate immediately if significant
+          if (isFinal && transcript.trim() && transcript.trim() !== lastTranscript.trim()) {
+            if (silenceTimer) {
+              clearTimeout(silenceTimer);
+            }
+            lastTranscript = transcript.trim();
+            translateText(transcript);
+          }
+        };
+        
+        recognition.onerror = (event) => {
+          console.error('Speech recognition error:', event.error);
+          stopRecording();
+          updateStatus('Speech recognition failed', 'error');
+          document.getElementById('audio-status').textContent = 'Error';
+        };
+        
+        recognition.onend = () => {
+          if (isRecording) {
+            // Auto-restart for continuous listening
+            setTimeout(() => {
+              if (isRecording) {
+                recognition.start();
+              }
+            }, 100);
+          } else {
+            stopRecording();
+          }
+        };
+        
+        document.getElementById('audio-status').textContent = 'Available';
+      } else {
+        document.getElementById('audio-status').textContent = 'Not Supported';
+        document.getElementById('asr-btn').disabled = true;
+      }
+    }
+
+    function stopRecording() {
+      isRecording = false;
+      const asrBtn = document.getElementById('asr-btn');
+      asrBtn.classList.remove('recording');
+      asrBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+      asrBtn.title = 'Voice Input';
+      updateStatus('Ready', 'ready');
+      document.getElementById('audio-status').textContent = 'Available';
+    }
+
+    // ASR Button Event Listener
+    document.getElementById('asr-btn').addEventListener('click', () => {
+      if (!recognition) {
+        updateStatus('Speech recognition not available', 'error');
+        return;
+      }
+      
+      if (isRecording) {
+        recognition.stop();
+      } else {
+        // Update language based on direction
+        const direction = document.getElementById('direction').value;
+        const sourceLang = direction.split('-')[0];
+        recognition.lang = sourceLang === 'es' ? 'es-ES' : 'en-US';
+        recognition.start();
+      }
+    });
+
+    // Clear Button Event Listener
+    document.getElementById('clear-btn').addEventListener('click', () => {
+      document.getElementById('text').value = '';
+      document.getElementById('out').innerHTML = 'No translation yet. Enter some text, use voice input, or click "Translate" to get started!';
+      updateStatus('Ready', 'ready');
+    });
+
+    // Allow Enter key in textarea to trigger translation
+    document.getElementById('text').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        document.getElementById('go').click();
+      }
+    });
+
+    // Initialize speech recognition on page load
+    setupSpeechRecognition();
+  </script>
+</body>
+</html>

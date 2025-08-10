@@ -1,0 +1,43 @@
+[package]
+name = "gemma-translator-rs"
+version = "0.1.0"
+edition = "2021"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[features]
+# Optional extras
+realtime = ["cpal", "hound", "reqwest", "tokio"]
+ui = ["actix-web", "sysinfo"]
+
+[dependencies]
+anyhow = "1"
+thiserror = "1"
+clap = { version = "4", features = ["derive"] }
+log = "0.4"
+env_logger = "0.11"
+rayon = "1"
+# Audio I/O + wav reading
+hound = { version = "3", optional = true }
+cpal = { version = "0.15", optional = true }
+# System info for the (optional) UI
+sysinfo = { version = "0.32", optional = true }
+# Simple HTTP server (optional UI)
+actix-web = { version = "4", optional = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# HTTP client for Whisper API
+reqwest = { version = "0.12", features = ["json", "multipart"], optional = true }
+tokio = { version = "1", features = ["full"], optional = true }
+# llama.cpp bindings for Gemma (GGUF). If this exact crate version differs on your setup, adjust per README.
+llama_cpp = "0.3"
+# Cross-platform CPU affinity/hints (nice-to-have tuning)
+num_cpus = "1"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+# On Linux (Pi and most servers) bring in jemalloc for fewer alloc stalls
+jemallocator = { version = "0.5", features = ["unprefixed_malloc_on_supported_platforms"] }
