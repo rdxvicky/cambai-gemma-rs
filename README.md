@@ -2,7 +2,7 @@
 
 ## 🎥 Tutorial Video
 
-[![Watch the tutorial](https://img.shields.io/badge/Watch%20Tutorial-YouTube-red?logo=youtube)](https://youtu.be/Gb2XAXXMKYQ)
+[![Watch the tutorial on YouTube](https://img.youtube.com/vi/Gb2XAXXMKYQ/maxresdefault.jpg)](https://youtu.be/Gb2XAXXMKYQ)
 
 **🎬 Click the thumbnail above to watch the complete tutorial!**
 
