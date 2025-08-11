@@ -2,8 +2,7 @@
 
 ## 🎥 Tutorial Video
 
-[![Watch the tutorial](assets/Screenshot%202025-08-11%20at%2011.19.16%E2%80%AFAM.png)](assets/tutorial.mp4)
-
+[![Watch the tutorial](https://img.shields.io/badge/Watch%20Tutorial-YouTube-red?logo=youtube)](https://youtu.be/Gb2XAXXMKYQ)
 
 **🎬 Click the thumbnail above to watch the complete tutorial!**
 
