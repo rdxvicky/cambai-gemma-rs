@@ -2,7 +2,7 @@
 
 ## 🎥 Tutorial Video
 
-▶ [Watch the tutorial right in your browser](https://github.com/rdxvicky/gemma-edge-translator/blob/main/assets/index.html)
+[![Watch the tutorial](https://img.youtube.com/vi/Gb2XAXXMKYQ/hqdefault.jpg)](https://rdxvicky.github.io/gemma-edge-translator/)
 
 **🎬 Click the thumbnail above to watch the complete tutorial!**
 
