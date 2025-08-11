@@ -48,8 +48,9 @@
             <i class="fas fa-microchip"></i>
           </div>
           <div class="stat-info">
-            <span class="stat-label">CPU Usage</span>
+            <span class="stat-label">App CPU Usage</span>
             <span class="stat-value" id="cpu">--%</span>
+            <small class="peak-value" id="cpu-peak">Peak: --%</small>
           </div>
         </div>
         <div class="stat-card">
@@ -57,8 +58,9 @@
             <i class="fas fa-memory"></i>
           </div>
           <div class="stat-info">
-            <span class="stat-label">Memory</span>
-            <span class="stat-value" id="mem">-- / -- MB</span>
+            <span class="stat-label">App Memory</span>
+            <span class="stat-value" id="mem">-- MB</span>
+            <small class="peak-value" id="mem-peak">Peak: -- MB</small>
           </div>
         </div>
         <div class="stat-card">
@@ -68,6 +70,15 @@
           <div class="stat-info">
             <span class="stat-label">Audio Input</span>
             <span class="stat-value" id="audio-status">Available</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-chart-area"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Performance</span>
+            <button id="reset-stats-btn" class="reset-btn">Reset Peaks</button>
           </div>
         </div>
       </div>
@@ -161,12 +172,85 @@
       try{
         const r = await fetch('/stats');
         const s = await r.json();
+        
+        // Update current stats
         document.getElementById('cpu').textContent = s.cpu_usage.toFixed(1) + '%';
-        document.getElementById('mem').textContent = s.mem_used_mb + ' / ' + s.mem_total_mb + ' MB';
+        document.getElementById('mem').textContent = s.mem_used_mb + ' MB';
+        
+        // Update peak stats
+        document.getElementById('cpu-peak').textContent = 'Peak: ' + s.peak_cpu.toFixed(1) + '%';
+        document.getElementById('mem-peak').textContent = 'Peak: ' + s.peak_mem_mb + ' MB';
+        
+        // Color-code CPU usage based on load
+        const cpuEl = document.getElementById('cpu');
+        const cpuPeakEl = document.getElementById('cpu-peak');
+        if (s.cpu_usage > 80) {
+          cpuEl.style.color = 'var(--accent-danger)';
+        } else if (s.cpu_usage > 50) {
+          cpuEl.style.color = 'var(--accent-warning)';
+        } else {
+          cpuEl.style.color = 'var(--text-primary)';
+        }
+        
+        // Highlight peak if it's high
+        if (s.peak_cpu > 80) {
+          cpuPeakEl.style.color = 'var(--accent-danger)';
+        } else {
+          cpuPeakEl.style.color = 'var(--text-muted)';
+        }
+        
+        // Color-code memory usage
+        const memEl = document.getElementById('mem');
+        const memPeakEl = document.getElementById('mem-peak');
+        const memPercent = (s.mem_used_mb / s.mem_total_mb) * 100;
+        if (memPercent > 85) {
+          memEl.style.color = 'var(--accent-danger)';
+        } else if (memPercent > 70) {
+          memEl.style.color = 'var(--accent-warning)';
+        } else {
+          memEl.style.color = 'var(--text-primary)';
+        }
+        
+        const peakMemPercent = (s.peak_mem_mb / s.mem_total_mb) * 100;
+        if (peakMemPercent > 85) {
+          memPeakEl.style.color = 'var(--accent-danger)';
+        } else {
+          memPeakEl.style.color = 'var(--text-muted)';
+        }
+        
       }catch(e){/* ignore */}
     }
-    setInterval(refreshStats, 1500);
+    // Refresh every 1 second for more responsive CPU monitoring
+    setInterval(refreshStats, 1000);
     refreshStats();
+    
+    // Reset stats button handler
+    document.getElementById('reset-stats-btn').addEventListener('click', async () => {
+      try {
+        const r = await fetch('/reset-stats', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'}
+        });
+        
+        if (r.ok) {
+          // Show success feedback
+          const btn = document.getElementById('reset-stats-btn');
+          const originalText = btn.textContent;
+          btn.textContent = '✓ Reset!';
+          btn.style.background = 'var(--accent-success)';
+          
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = '';
+          }, 2000);
+          
+          // Immediately refresh stats
+          refreshStats();
+        }
+      } catch (error) {
+        console.error('Reset failed:', error);
+      }
+    });
 
     document.getElementById('go').addEventListener('click', async () =>{
       const direction = document.getElementById('direction').value;

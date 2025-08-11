@@ -9,7 +9,8 @@ A high-performance Rust application that combines OpenAI's Whisper for speech re
 - **Speech-to-Text**: Uses Whisper API (OpenAI or local) for accurate transcription
 - **Smart Translation**: Powered by Gemma-2B-IT model via llama.cpp
 - **Real-time Capture**: Live microphone recording and processing
-- **Web UI**: Optional local web interface with system monitoring
+- **Web UI**: Optional local web interface with real-time performance monitoring
+- **Performance Tracking**: Application-specific CPU and memory usage with peak detection
 - **Cross-Platform**: Supports macOS, Linux, and Raspberry Pi
 - **Efficient**: Optimized for resource-constrained devices
 
@@ -48,11 +49,12 @@ cargo build --release --features "ui,realtime"
   --direction en-es \
   --gemma-model path/to/gemma-2b-it.gguf
 
-# Launch web UI
+# Launch web UI with performance monitoring
 ./target/release/gemma-edge-translator \
   --ui \
   --port 8080 \
-  --gemma-model path/to/gemma-2b-it.gguf
+  --gemma-model models/gemma-2b-it.Q4_K_M.gguf \
+  --direction en-es
 ```
 
 ## 📋 Requirements
@@ -244,6 +246,39 @@ cargo build --release --features realtime
 
 # Everything enabled
 cargo build --release --features "ui,realtime"
+```
+
+## 📊 Performance Monitoring
+
+The web UI includes real-time performance monitoring to help you understand your application's resource usage:
+
+### Features
+- **Application-specific tracking**: Shows CPU and memory usage for the translator process only
+- **Peak detection**: Captures and displays maximum CPU and memory usage spikes
+- **Real-time updates**: Performance metrics refresh every second
+- **Historical data**: Maintains 5 minutes of performance history
+- **Reset capability**: Clear peak metrics with the "Reset Peaks" button
+
+### What to Expect
+- **Memory Usage**: 
+  - Starts at ~10-50MB (basic application)
+  - Jumps to ~3GB when Gemma model loads
+  - Peak memory shows the highest usage since startup
+- **CPU Usage**:
+  - Shows real-time CPU consumption during translations
+  - Spikes during model inference (can reach 50-200%+ on multi-core systems)
+  - Peak CPU captures the highest usage spike
+
+### Usage
+```bash
+# Launch with performance monitoring
+./target/release/gemma-edge-translator \
+  --ui \
+  --port 8080 \
+  --gemma-model models/gemma-2b-it.Q4_K_M.gguf \
+  --direction en-es
+
+# Then visit http://localhost:8080 to see real-time metrics
 ```
 
 ## 🐛 Troubleshooting
