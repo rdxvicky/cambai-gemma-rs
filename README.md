@@ -50,12 +50,25 @@ cargo build --release --features "ui,realtime"
   --gemma-model path/to/gemma-2b-it.gguf
 
 # Launch web UI with performance monitoring
-./target/release/gemma-edge-translator \
-  --ui \
-  --port 8080 \
-  --gemma-model models/gemma-2b-it.Q4_K_M.gguf \
-  --direction en-es
+./target/release/gemma-edge-translator --ui --port 8080 --gemma-model models/gemma-2b-it.Q4_K_M.gguf --direction en-es
 ```
+
+## 🎥 Tutorial Video
+
+[![Gemma Edge Translator Tutorial - Real-time Speech Translation with Performance Monitoring](./assets/Screenshot%202025-08-11%20at%2011.19.16%20AM.png)](./assets/tutorial.mp4)
+
+**🎬 Click the thumbnail above to watch the complete tutorial!**
+
+**What you'll learn:**
+- ✅ **Installation & Setup** - Complete build process from scratch
+- ✅ **Model Configuration** - Download and setup Gemma-2B-IT model  
+- ✅ **Web UI Demo** - Real-time performance monitoring in action
+- ✅ **Translation Examples** - Text and voice input demonstrations
+- ✅ **Performance Insights** - CPU and memory usage tracking explained
+- ✅ **Speech Recognition** - Live microphone input and real-time translation
+- ✅ **Peak Detection** - Understanding resource usage spikes
+
+*📹 **Tutorial Video**: [`assets/tutorial.mp4`](./assets/tutorial.mp4) - Full demonstration of features and performance monitoring*
 
 ## 📋 Requirements
 
